@@ -17,6 +17,7 @@ export interface RecruitmentPlanInput {
   // Step 3
   experienceLevel: ExperienceLevel
   requiredSkills: string[]
+  preferredQualifications?: string
   // Step 4
   industry: string
   jobTitle: string
