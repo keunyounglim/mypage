@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>카드뉴스 템플릿 — 하루 한입 클로드</title>
+  <style>
+    /* ===========================
+       Anthropic 공식 브랜드 토큰
+    =========================== */
+    :root {
+      --color-dark:   #141413;
+      --color-light:  #faf9f5;
+      --color-sand:   #e8e6dc;
+      --color-orange: #d97757;
+      --color-blue:   #6a9bcc;
+      --color-green:  #788c5d;
+
+      --font-serif: Georgia, 'Times New Roman', serif;
+      --font-mono:  'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+      --font-sans:  -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+      --card-size:    1080px;
+      --card-padding: 60px;
+      --top-line:     4px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--color-sand);
+      font-family: var(--font-sans);
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+      align-items: center;
+    }
+
+    /* ===========================
+       카드 기본 구조
+    =========================== */
+    .card {
+      width: var(--card-size);
+      height: var(--card-size);
+      background: var(--color-light);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      padding: var(--card-padding);
+      overflow: hidden;
+
+      /* 상단 오렌지 라인 — 시그니처 */
+      border-top: var(--top-line) solid var(--color-orange);
+
+      /* 그림자 */
+      box-shadow: 0 4px 24px rgba(20, 20, 19, 0.10);
+    }
+
+    /* ===========================
+       공통 타이포그래피
+    =========================== */
+    .card-label {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--color-orange);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-family: var(--font-serif);
+      font-size: 52px;
+      font-weight: bold;
+      color: var(--color-dark);
+      line-height: 1.2;
+      margin-bottom: 32px;
+    }
+
+    .card-title-lg {
+      font-size: 64px;
+    }
+
+    .card-subtitle {
+      font-family: var(--font-serif);
+      font-size: 28px;
+      color: var(--color-dark);
+      opacity: 0.75;
+      line-height: 1.4;
+      margin-bottom: 32px;
+    }
+
+    .card-body {
+      font-family: var(--font-sans);
+      font-size: 20px;
+      color: var(--color-dark);
+      line-height: 1.8;
+    }
+
+    .card-body p {
+      margin-bottom: 16px;
+    }
+
+    /* ===========================
+       코드 블록
+    =========================== */
+    .code-block {
+      background: var(--color-dark);
+      color: var(--color-light);
+      font-family: var(--font-mono);
+      font-size: 18px;
+      line-height: 1.6;
+      padding: 28px 32px;
+      border-radius: 4px;
+      margin: 24px 0;
+      overflow: hidden;
+      white-space: pre;
+    }
+
+    .code-block .comment {
+      color: #788c5d;
+    }
+
+    .code-block .command {
+      color: #d97757;
+    }
+
+    .code-block .string {
+      color: #6a9bcc;
+    }
+
+    /* ===========================
+       포인트 리스트
+    =========================== */
+    .point-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .point-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      font-family: var(--font-sans);
+      font-size: 20px;
+      color: var(--color-dark);
+      line-height: 1.5;
+    }
+
+    .point-list li .bullet {
+      width: 32px;
+      height: 32px;
+      background: var(--color-orange);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: bold;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* ===========================
+       비교 테이블
+    =========================== */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 24px 0;
+    }
+
+    .compare-table th {
+      background: var(--color-dark);
+      color: var(--color-light);
+      font-family: var(--font-mono);
+      font-size: 15px;
+      padding: 16px 24px;
+      text-align: left;
+      letter-spacing: 0.08em;
+    }
+
+    .compare-table td {
+      font-size: 18px;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--color-sand);
+      vertical-align: top;
+    }
+
+    .compare-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .compare-table td:first-child {
+      color: var(--color-dark);
+      opacity: 0.5;
+    }
+
+    .compare-table td:last-child {
+      color: var(--color-dark);
+      font-weight: 500;
+    }
+
+    /* ===========================
+       하이라이트 박스
+    =========================== */
+    .highlight-box {
+      background: var(--color-sand);
+      border-left: 4px solid var(--color-orange);
+      padding: 24px 28px;
+      margin: 24px 0;
+      font-size: 20px;
+      line-height: 1.7;
+      color: var(--color-dark);
+    }
+
+    /* ===========================
+       카드 하단 푸터
+    =========================== */
+    .card-footer {
+      margin-top: auto;
+      padding-top: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--color-sand);
+    }
+
+    .card-footer .series {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--color-dark);
+      opacity: 0.4;
+    }
+
+    .card-footer .progress {
+      display: flex;
+      gap: 6px;
+    }
+
+    .card-footer .progress span {
+      width: 24px;
+      height: 4px;
+      background: var(--color-sand);
+      border-radius: 2px;
+    }
+
+    .card-footer .progress span.active {
+      background: var(--color-orange);
+    }
+
+    /* ===========================
+       카드 번호 (우상단)
+    =========================== */
+    .card-number {
+      position: absolute;
+      top: calc(var(--card-padding) + 4px);
+      right: var(--card-padding);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--color-dark);
+      opacity: 0.3;
+    }
+
+    /* ===========================
+       특수 카드: 타이틀 카드 (Card 1)
+    =========================== */
+    .card.card-title-type {
+      justify-content: flex-end;
+    }
+
+    .card.card-title-type .bg-accent {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 380px;
+      height: 380px;
+      background: var(--color-orange);
+      opacity: 0.06;
+      border-radius: 50%;
+      transform: translate(30%, -30%);
+    }
+
+    /* ===========================
+       특수 카드: CTA 카드 (Card 9)
+    =========================== */
+    .card.card-cta {
+      background: var(--color-dark);
+      border-top-color: var(--color-orange);
+    }
+
+    .card.card-cta .card-label {
+      color: var(--color-orange);
+    }
+
+    .card.card-cta .card-title {
+      color: var(--color-light);
+    }
+
+    .card.card-cta .card-body {
+      color: var(--color-light);
+      opacity: 0.75;
+    }
+
+    .card.card-cta .card-footer {
+      border-top-color: rgba(255,255,255,0.1);
+    }
+
+    .card.card-cta .card-footer .series {
+      color: var(--color-light);
+    }
+
+    .card.card-cta .card-footer .progress span {
+      background: rgba(255,255,255,0.15);
+    }
+
+    .card.card-cta .card-footer .progress span.active {
+      background: var(--color-orange);
+    }
+
+    .cta-command {
+      display: inline-block;
+      background: var(--color-orange);
+      color: white;
+      font-family: var(--font-mono);
+      font-size: 22px;
+      padding: 16px 32px;
+      border-radius: 4px;
+      margin-top: 32px;
+    }
+
+    /* ===========================
+       인쇄/내보내기 힌트
+    =========================== */
+    @media print {
+      body { background: white; padding: 0; gap: 0; }
+      .card { box-shadow: none; page-break-after: always; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================
+       CARD 1: 타이틀 카드
+  ========================= -->
+  <div class="card card-title-type">
+    <div class="bg-accent"></div>
+    <div class="card-number">1 / 9</div>
+
+    <div class="card-label">하루 한입 클로드 · Day N</div>
+    <div class="card-title card-title-lg">카드 타이틀</div>
+    <div class="card-subtitle">부제목 또는 한 줄 요약</div>
+
+    <div class="card-footer">
+      <span class="series">하루 한입 클로드 — 비개발자를 위한 Claude Code 가이드</span>
+      <div class="progress">
+        <span class="active"></span>
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================
+       CARD 2: 오늘 배울 것
+  ========================= -->
+  <div class="card">
+    <div class="card-number">2 / 9</div>
+
+    <div class="card-label">오늘 배울 것</div>
+    <div class="card-title">세 가지 포인트</div>
+
+    <ul class="point-list">
+      <li>
+        <span class="bullet">1</span>
+        <span>첫 번째 배울 내용 — 핵심 키워드를 포함하여 한 줄로</span>
+      </li>
+      <li>
+        <span class="bullet">2</span>
+        <span>두 번째 배울 내용 — 구체적이고 실용적으로</span>
+      </li>
+      <li>
+        <span class="bullet">3</span>
+        <span>세 번째 배울 내용 — 오늘 실습 결과물 예고</span>
+      </li>
+    </ul>
+
+    <div class="card-footer">
+      <span class="series">Day N / 7</span>
+      <div class="progress">
+        <span class="active"></span>
+        <span class="active"></span>
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================
+       CARD 3: Why
+  ========================= -->
+  <div class="card">
+    <div class="card-number">3 / 9</div>
+
+    <div class="card-label">Why — 왜 중요한가</div>
+    <div class="card-title">제목</div>
+
+    <div class="card-body">
+      <p>Why 설명 본문. 독자가 공감할 수 있는 구체적인 상황이나 문제점에서 시작하세요.</p>
+    </div>
+
+    <div class="highlight-box">
+      핵심 인사이트 또는 강조할 문장을 여기에 씁니다.
+    </div>
+
+    <div class="card-footer">
+      <span class="series">Day N / 7</span>
+      <div class="progress">
+        <span class="active"></span><span class="active"></span>
+        <span class="active"></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================
+       CARD 4: What (개념 1)
+  ========================= -->
+  <div class="card">
+    <div class="card-number">4 / 9</div>
+
+    <div class="card-label">What — 핵심 개념 1</div>
+    <div class="card-title">개념 이름</div>
+
+    <div class="card-body">
+      <p>개념 설명 본문.</p>
+    </div>
+
+    <div class="code-block"><span class="comment"># 예시 코드</span>
+<span class="command">claude</span> <span class="string">"명령어 예시"</span></div>
+
+    <div class="card-footer">
+      <span class="series">Day N / 7</span>
+      <div class="progress">
+        <span class="active"></span><span class="active"></span>
+        <span class="active"></span><span class="active"></span>
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================
+       CARD 5: What (개념 2)
+  ========================= -->
+  <div class="card">
+    <div class="card-number">5 / 9</div>
+
+    <div class="card-label">What — 핵심 개념 2</div>
+    <div class="card-title">개념 이름</div>
+
+    <div class="card-body">
+      <p>두 번째 핵심 개념 설명.</p>
+    </div>
+
+    <table class="compare-table">
+      <tr>
+        <th>비교 항목 A</th>
+        <th>비교 항목 B</th>
+      </tr>
+      <tr>
+        <td>A의 특징 1</td>
+        <td>B의 특징 1</td>
+      </tr>
+      <tr>
+        <td>A의 특징 2</td>
+        <td>B의 특징 2</td>
+      </tr>
+    </table>
+
+    <div class="card-footer">
+      <span class="series">Day N / 7</span>
+      <div class="progress">
+        <span class="active"></span><span class="active"></span>
+        <span class="active"></span><span class="active"></span>
+        <span class="active"></span>
+        <span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================
+       CARD 6: How (실습 1)
+  ========================= -->
+  <div class="card">
+    <div class="card-number">6 / 9</div>
+
+    <div class="card-label">How — 실습 1단계</div>
+    <div class="card-title">실습 제목</div>
+
+    <div class="card-body">
+      <p>실습 설명. 구체적으로 무엇을 할지 안내합니다.</p>
+    </div>
+
+    <div class="code-block"><span class="comment"># 터미널에 그대로 복사해서 실행하세요</span>
+<span class="command">claude</span> <span class="string">"실습 명령어"</span></div>
+
+    <div class="card-footer">
+      <span class="series">Day N / 7</span>
+      <div class="progress">
+        <span class="active"></span><span class="active"></span>
+        <span class="active"></span><span class="active"></span>
+        <span class="active"></span><span class="active"></span>
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================
+       CARD 7: How (실습 2)
+  ========================= -->
+  <div class="card">
+    <div class="card-number">7 / 9</div>
+
+    <div class="card-label">How — 실습 2단계</div>
+    <div class="card-title">실습 제목</div>
+
+    <div class="card-body">
+      <p>두 번째 실습 단계 안내.</p>
+    </div>
+
+    <ul class="point-list">
+      <li>
+        <span class="bullet">①</span>
+        <span>단계 설명</span>
+      </li>
+      <li>
+        <span class="bullet">②</span>
+        <span>단계 설명</span>
+      </li>
+      <li>
+        <span class="bullet">③</span>
+        <span>단계 설명</span>
+      </li>
+    </ul>
+
+    <div class="card-footer">
+      <span class="series">Day N / 7</span>
+      <div class="progress">
+        <span class="active"></span><span class="active"></span>
+        <span class="active"></span><span class="active"></span>
+        <span class="active"></span><span class="active"></span>
+        <span class="active"></span>
+        <span></span><span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================
+       CARD 8: 오늘의 정리
+  ========================= -->
+  <div class="card">
+    <div class="card-number">8 / 9</div>
+
+    <div class="card-label">오늘의 정리</div>
+    <div class="card-title">핵심 3가지</div>
+
+    <ul class="point-list">
+      <li>
+        <span class="bullet">✓</span>
+        <span><strong>키워드 1</strong> — 한 줄 정리</span>
+      </li>
+      <li>
+        <span class="bullet">✓</span>
+        <span><strong>키워드 2</strong> — 한 줄 정리</span>
+      </li>
+      <li>
+        <span class="bullet">✓</span>
+        <span><strong>키워드 3</strong> — 한 줄 정리</span>
+      </li>
+    </ul>
+
+    <div class="card-footer">
+      <span class="series">Day N / 7</span>
+      <div class="progress">
+        <span class="active"></span><span class="active"></span>
+        <span class="active"></span><span class="active"></span>
+        <span class="active"></span><span class="active"></span>
+        <span class="active"></span><span class="active"></span>
+        <span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================
+       CARD 9: 다음 Day 예고 + CTA
+  ========================= -->
+  <div class="card card-cta">
+    <div class="card-number" style="color: rgba(250,249,245,0.3);">9 / 9</div>
+
+    <div class="card-label">내일 예고 — Day N+1</div>
+    <div class="card-title">다음에 배울 주제</div>
+
+    <div class="card-body">
+      <p>다음 Day에서 무엇을 배울지 한 줄로 예고합니다. 기대감을 만드세요.</p>
+    </div>
+
+    <div class="cta-command">claude "오늘 배운 것 복습해줘"</div>
+
+    <div class="card-footer">
+      <span class="series">하루 한입 클로드 · Day N / 7 완료</span>
+      <div class="progress">
+        <span class="active"></span><span class="active"></span>
+        <span class="active"></span><span class="active"></span>
+        <span class="active"></span><span class="active"></span>
+        <span class="active"></span><span class="active"></span>
+        <span class="active"></span>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
